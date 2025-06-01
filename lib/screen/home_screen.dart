@@ -1,10 +1,12 @@
+import 'package:assignment_coding_ninja/controller/notes_list_controller.dart';
 import 'package:assignment_coding_ninja/screen/notes_form_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
 
+  final notesListController = Get.put(NotesListController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +56,36 @@ class HomeScreen extends StatelessWidget {
                   ), 
                 ),
               ],
+            ),
+          ),
+          Expanded(
+            child: GetX<NotesListController>(
+              builder: (controller){
+                return ListView.builder(
+                  itemCount: controller.notesList.length,
+                  itemBuilder: (context, index) {
+                    final note = controller.notesList[index];
+                    return Dismissible(
+                      key: Key(note.notesId.toString()),
+                      direction: DismissDirection.horizontal,
+                      onDismissed: (direction) {
+                        notesListController.deleteNote(note.notesId);
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(radius: 10, child: Icon(Icons.note),),
+                        title: Text(note.notesTitle),
+                        subtitle: Text(note.notesContent),
+                        contentPadding: EdgeInsets.all(15),
+                        trailing: TextButton(
+                          onPressed: () {
+                            Get.to(NotesFormScreen(appBarTxt: "Update Note", updateNote: note,));
+                          }, 
+                          child: Text("Update"),
+                        ),
+                      ),
+                    );
+                  });
+              }
             ),
           ),
         ],

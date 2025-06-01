@@ -1,17 +1,60 @@
+import 'package:assignment_coding_ninja/model/notes_class.dart';
+import 'package:assignment_coding_ninja/services/notes_database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class NotesFormScreen extends StatelessWidget {
+class NotesFormScreen extends StatefulWidget {
   final String appBarTxt;
-  const NotesFormScreen({super.key, required this.appBarTxt});
+  final NotesClass? updateNote;
+  const NotesFormScreen({super.key, required this.appBarTxt, this.updateNote});
 
   @override
+  State<NotesFormScreen> createState() => _NotesFormScreenState();
+}
+
+class _NotesFormScreenState extends State<NotesFormScreen> {
+  late TextEditingController noteTitle;
+  late TextEditingController noteContent;
+
+  @override
+  void initState() {
+    super.initState();
+    noteTitle = TextEditingController(text: widget.updateNote?.notesTitle ?? '');
+    noteContent = TextEditingController(text: widget.updateNote?.notesContent ?? '');
+  }
+
+  @override
+  void dispose() {
+    noteTitle.dispose();
+    noteContent.dispose();
+    super.dispose();
+  }
+
+  void submitNote() async{
+    if(noteTitle.text.isEmpty || noteContent.text.isEmpty){
+      Get.snackbar(
+        "Missing Fields",
+        "Please fill both title and content fields",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if(widget.updateNote == null){
+      await NotesDatabaseService.instance.insertNote(noteTitle.text, noteContent.text, DateTime.now().millisecondsSinceEpoch);
+    } else {
+      await NotesDatabaseService.instance.updateNote(widget.updateNote!.notesId, noteTitle.text, noteContent.text);
+    }
+    
+    Get.back();
+  }
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController noteTitle = TextEditingController();
-    final TextEditingController noteContent = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTxt),
+        title: Text(widget.appBarTxt),
         centerTitle: true,
       ),
       body: Padding(
@@ -56,7 +99,7 @@ class NotesFormScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30,),
             ElevatedButton(
-              onPressed: (){Get.back();}, 
+              onPressed: submitNote, 
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[200],
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),

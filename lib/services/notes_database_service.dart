@@ -72,11 +72,12 @@ class NotesDatabaseService {
     return notes;
   }
 
-  Future<void> updateNote(int id, String content) async{ 
+  Future<void> updateNote(int id,String title, String content) async{ 
     final db = await database;
     await db.update(
       tableName, 
       {
+        notesTitle : title,
         notesContent : content,
         updatedAt : DateTime.now().millisecondsSinceEpoch,
       },
