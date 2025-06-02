@@ -1,3 +1,4 @@
+import 'package:assignment_coding_ninja/controller/notes_list_controller.dart';
 import 'package:assignment_coding_ninja/model/notes_class.dart';
 import 'package:assignment_coding_ninja/services/notes_database_service.dart';
 import 'package:flutter/material.dart';
@@ -42,13 +43,26 @@ class _NotesFormScreenState extends State<NotesFormScreen> {
       return;
     }
 
-    if(widget.updateNote == null){
-      await NotesDatabaseService.instance.insertNote(noteTitle.text, noteContent.text, DateTime.now().millisecondsSinceEpoch);
-    } else {
-      await NotesDatabaseService.instance.updateNote(widget.updateNote!.notesId, noteTitle.text, noteContent.text);
-    }
+    try {
+      if(widget.updateNote == null){
+        await NotesDatabaseService.instance.insertNote(noteTitle.text, noteContent.text, DateTime.now().millisecondsSinceEpoch);
+      } else {
+        await NotesDatabaseService.instance.updateNote(widget.updateNote!.notesId, noteTitle.text, noteContent.text);
+      }
+
+      final noteController = Get.find<NotesListController>();
+      noteController.fetchNotes();
     
-    Get.back();
+      Get.back();
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong while submitting note",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
   }
   @override
   Widget build(BuildContext context) {
